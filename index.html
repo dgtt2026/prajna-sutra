@@ -282,13 +282,20 @@ body{font-size:16px}
 <script>
 "use strict";
 
-// iOS Safari 會忽略 viewport 的 maximum-scale 設定，這裡額外攔截快速連續點擊，避免誤觸發雙擊放大
+// iOS Safari 會忽略 viewport 的 maximum-scale 設定，這裡額外攔截：
+// 1. 雙指縮放手勢（gesturestart 是 WebKit 專屬事件）
+// 2. 快速連續點擊觸發的雙擊放大
 (function(){
+  document.addEventListener('gesturestart',function(e){e.preventDefault()},{passive:false});
+  document.addEventListener('gesturechange',function(e){e.preventDefault()},{passive:false});
   let lastTouchEnd=0;
   document.addEventListener('touchend',function(e){
     const now=Date.now();
     if(now-lastTouchEnd<=350)e.preventDefault();
     lastTouchEnd=now;
+  },{passive:false});
+  document.addEventListener('touchmove',function(e){
+    if(e.touches&&e.touches.length>1)e.preventDefault();
   },{passive:false});
 })();
 
